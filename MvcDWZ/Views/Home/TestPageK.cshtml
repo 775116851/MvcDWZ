@@ -1,0 +1,76 @@
+﻿@{
+    Layout = null;
+}
+@using System.Data;
+@using System.Data.SqlClient;
+@using MvcDWZ.Base;
+<div id="table-content">
+    <form id="pagerForm" method="post" action="@Url.Action("TestPageK","Home")">
+	    @*<input type="hidden" name="status" value="${param.status}">
+	    <input type="hidden" name="keywords" value="${param.keywords}" />*@
+	    <input type="hidden" name="pageNum" value="1" />
+	    <input type="hidden" name="numPerPage" value="@ViewData["pageCount"]" />
+	    <input type="hidden" name="orderField" value="" /><!--【可选】查询排序-->
+        <input type="hidden" name="orderDirection" value="" /><!--【可选】升序降序-->
+        <input type="hidden" name="sUserType" value="" />
+        <input type="hidden" name="sUserID" value="" />
+    </form>
+    <table class="table" width="100%" layoutH="138">
+		<thead>
+			<tr>
+                <th><input type="checkbox" group="ids" class="checkboxCtrl"></th>
+				<th>用户编号</th>
+                <th>用户名称</th>
+                <th>用户类型</th>
+                <th orderField="CreateTime" class="desc">日期</th>
+			</tr>
+		</thead>
+		<tbody>
+            @if (ViewData["dsUserList"] != null)
+            {
+                DataSet dsUserList = ViewData["dsUserList"] as DataSet;
+                if (dsUserList != null && dsUserList.Tables.Count > 0)
+                {
+                    foreach(DataRow drUser in dsUserList.Tables[0].Rows)
+                    {
+                        <tr target="sid_user" rel="@drUser["SysNo"]">
+                            <td><input name="ids" value="@drUser["SysNo"]" type="checkbox"></td>
+                            <td>@drUser["UserID"]</td>
+                            <td>@drUser["UserName"]</td>
+                            <td>@(AppEnum.GetDescription(typeof(AppEnum.UserType),Convert.ToInt32(drUser["UserType"])))</td>
+                            <td>@drUser["CreateTime"]</td>
+                        </tr>
+                    }
+                }
+            }
+			@*<tr target="sid_user" rel="1">
+				<td>天津农信社</td>
+				<td>A120113196309052434</td>
+				<td>天津市华建装饰工程有限公司</td>
+				<td>联社营业部</td>
+				<td>29385739203816293</td>
+				<td>5级</td>
+				<td>政府机构</td>
+				<td>2009-05-21</td>
+			</tr>*@
+			
+		</tbody>
+	</table>
+	<div class="panelBar">
+		<div class="pages">
+			<span>显示</span>
+			<select class="combox" name="numPerPage" onchange="navTabPageBreak({numPerPage:this.value},'table-content')">
+                <option value="@ViewData["pageCount"]">选择</option>
+                <option value="2">2</option>
+				<option value="20">20</option>
+				<option value="50">50</option>
+				<option value="100">100</option>
+				<option value="200">200</option>
+			</select>
+			<span>条，共 @(ViewData["totalCount"])条</span>
+		</div>
+		
+		<div class="pagination" targetType="navTab" totalCount="@ViewData["totalCount"]" numPerPage="@ViewData["pageCount"]" pageNumShown="10" currentPage="@ViewData["pageIndex"]" rel="table-content"></div>
+
+	</div>
+</div>

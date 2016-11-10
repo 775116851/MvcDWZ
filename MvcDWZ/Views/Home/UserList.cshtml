@@ -1,0 +1,136 @@
+﻿@{
+    Layout = null;
+}
+@using System.Data;
+@using System.Data.SqlClient;
+@using MvcDWZ.Base;
+<form id="pagerForm" method="post" action="@Url.Action("UserList","Home")">
+	@*<input type="hidden" name="status" value="${param.status}">*@
+	@*<input type="hidden" name="sUserID" value="" />*@
+	<input type="hidden" name="pageNum" value="1" />
+	<input type="hidden" name="numPerPage" value="@ViewData["pageCount"]" />
+	<input type="hidden" name="orderField" value="" /><!--【可选】查询排序-->
+    <input type="hidden" name="orderDirection" value="" /><!--【可选】升序降序-->
+</form>
+
+
+<div class="pageHeader">
+	<form onsubmit="return navTabSearch(this);" action="@Url.Action("UserList","Home")" method="post" rel="pagerForm">
+	<div class="searchBar">
+		<table class="searchContent">
+			<tr>
+				<td>
+					用户编号：<input type="text" name="sUserID" value="@ViewData["uUserID"]"/>
+				</td>
+				<td>
+					<select class="combox" name="sUserType">
+						<option value="-9999">全部类型</option>
+                        @if (ViewData["dtUserType"] != null)
+                        {
+                            DataTable dtUserType = ViewData["dtUserType"] as DataTable;
+                            if(dtUserType != null)
+                            {
+                                int uUserType = -9999;
+                                if (ViewData["uUserType"] != null)
+                                {
+                                    uUserType = Convert.ToInt32(ViewData["uUserType"]);
+                                }
+                                foreach(DataRow drUserType in dtUserType.Rows)
+                                {
+                                    if (Convert.ToInt32(drUserType["value"]) == uUserType)
+                                    {
+                                        <option value="@drUserType["value"]" selected="selected">@drUserType["text"]</option>
+                                    }
+                                    else
+                                    {
+                                        <option value="@drUserType["value"]">@drUserType["text"]</option>
+                                    }
+                                }
+                            }
+                        }
+					</select>
+				</td>
+				@*<td>
+					建档日期：<input type="text" class="date" readonly="true" />
+				</td>*@
+			</tr>
+		</table>
+		<div class="subBar">
+			<ul>
+				<li><div class="buttonActive"><div class="buttonContent"><button type="submit">检索</button></div></div></li>
+				@*<li><a class="button" href="demo_page6.html" target="dialog" mask="true" title="查询框"><span>高级检索</span></a></li>*@
+			</ul>
+		</div>
+	</div>
+	</form>
+</div>
+<div class="pageContent">
+	<div class="panelBar">
+		<ul class="toolBar">
+			<li><a class="add" href="\Home\AddUser" target="dialog" mask="true" title="添加用户"><span>添加</span></a></li>
+			<li><a class="delete" href="\Home\UserDelte?ids={sid_user}" target="ajaxTodo" title="确定要删除吗?"><span>删除</span></a></li>
+            <li><a title="确定要批量删除吗?" target="selectedTodo" rel="ids" postType="string" href="\Home\UserDelte" class="delete"><span>批量删除</span></a></li>
+			<li><a class="edit" href="\Home\AddUser?userSysNo={sid_user}" target="dialog" mask="true" title="保存用户"><span>修改</span></a></li>
+			<li class="line">line</li>
+			@*<li><a class="icon" href="demo/common/dwz-team.xls" target="dwzExport" targetType="navTab" title="实要导出这些记录吗?"><span>导出EXCEL</span></a></li>*@
+		</ul>
+	</div>
+	<table class="table" width="100%" layoutH="138">
+		<thead>
+			<tr>
+                <th><input type="checkbox" group="ids" class="checkboxCtrl"></th>
+				<th>用户编号</th>
+                <th>用户名称</th>
+                <th>用户类型</th>
+                <th orderField="CreateTime" class="desc">日期</th>
+			</tr>
+		</thead>
+		<tbody>
+            @if (ViewData["dsUserList"] != null)
+            {
+                DataSet dsUserList = ViewData["dsUserList"] as DataSet;
+                if (dsUserList != null && dsUserList.Tables.Count > 0)
+                {
+                    foreach(DataRow drUser in dsUserList.Tables[0].Rows)
+                    {
+                        <tr target="sid_user" rel="@drUser["SysNo"]">
+                            <td><input name="ids" value="@drUser["SysNo"]" type="checkbox"></td>
+                            <td>@drUser["UserID"]</td>
+                            <td>@drUser["UserName"]</td>
+                            <td>@(AppEnum.GetDescription(typeof(AppEnum.UserType),Convert.ToInt32(drUser["UserType"])))</td>
+                            <td>@drUser["CreateTime"]</td>
+                        </tr>
+                    }
+                }
+            }
+			@*<tr target="sid_user" rel="1">
+				<td>天津农信社</td>
+				<td>A120113196309052434</td>
+				<td>天津市华建装饰工程有限公司</td>
+				<td>联社营业部</td>
+				<td>29385739203816293</td>
+				<td>5级</td>
+				<td>政府机构</td>
+				<td>2009-05-21</td>
+			</tr>*@
+			
+		</tbody>
+	</table>
+	<div class="panelBar">
+		<div class="pages">
+			<span>显示</span>
+			<select class="combox" name="numPerPage" onchange="navTabPageBreak({numPerPage:this.value})">
+                <option value="@ViewData["pageCount"]">选择</option>
+                <option value="2">2</option>
+				<option value="20">20</option>
+				<option value="50">50</option>
+				<option value="100">100</option>
+				<option value="200">200</option>
+			</select>
+			<span>条，共 @(ViewData["totalCount"])条</span>
+		</div>
+		
+		<div class="pagination" targetType="navTab" totalCount="@ViewData["totalCount"]" numPerPage="@ViewData["pageCount"]" pageNumShown="10" currentPage="@ViewData["pageIndex"]"></div>
+
+	</div>
+</div>

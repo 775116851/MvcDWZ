@@ -1,0 +1,79 @@
+﻿@{
+    Layout = null;
+}
+
+<!DOCTYPE html>
+@using System.Data;
+@{
+    string u_UserID = "";
+    string u_UserName = "";
+    int u_UserType = -9999;
+    if(Model != null){
+        DataSet dsUserInfo = Model as DataSet;
+        DataRow drUserInfo = dsUserInfo.Tables[0].Rows[0];
+        u_UserID = Convert.ToString(drUserInfo["UserID"]);
+        u_UserName = Convert.ToString(drUserInfo["UserName"]);
+        u_UserType = Convert.ToInt32(drUserInfo["UserType"]);
+    } 
+}
+<div class="pageContent">
+	<form method="post" action="@Url.Action("SaveUser","Home")" class="pageForm required-validate" onsubmit="return validateCallback(this, dialogAjaxDone);">
+		<div class="pageFormContent" layoutH="56">
+			<p>
+                <input type="hidden" name="u_SysNo" value="@ViewData["uSysNo"]" />
+				<label>用户编号：</label>
+				<input name="u_UserID" class="required" type="text" size="30" alt="请输入用户编号" value="@u_UserID"/>
+			</p>
+			<p>
+				<label>用户名称：</label>
+				<input name="u_UserName" class="required" type="text" size="30" alt="请输入用户名称" value="@u_UserName"/>
+			</p>
+			@*<p>
+				<label>用户类型：</label>
+				<input name="org2.id" value="" type="hidden">
+                <input name="org2.orgName" value="" type="hidden">
+				<input class="required" name="org2.orgName" type="text" suggestFields="orgNum,id,orgName" suggestUrl="@ViewData["UserTypeList"]" lookupGroup="org2" readonly="readonly"/>
+			</p>*@
+			<p>
+				<label>用户类型：</label>
+				<select name="u_UserType" class="required combox">
+                    @if (u_UserType == -9999)
+                    {
+                        <option selected="selected" value="-9999">请选择</option>
+                    }
+                    else
+                    {
+                        
+                    }
+                    @if (ViewData["dtUserType"] != null)
+                    {
+                        DataTable dtUserType = ViewData["dtUserType"] as DataTable;
+                        if(dtUserType != null)
+                        {
+                            foreach(DataRow drUserType in dtUserType.Rows)
+                            {
+                                if (Convert.ToInt32(drUserType["value"]) == u_UserType)
+                                {
+                                    <option selected="selected" value="@drUserType["value"]">@drUserType["text"]</option>
+                                }
+                                else
+                                {
+                                    <option value="@drUserType["value"]">@drUserType["text"]</option>
+                                }
+                            }
+                        }
+                    }
+				</select>
+			</p>
+		</div>
+		<div class="formBar">
+			<ul>
+				<!--<li><a class="buttonActive" href="javascript:;"><span>保存</span></a></li>-->
+				<li><div class="buttonActive"><div class="buttonContent"><button type="submit">保存</button></div></div></li>
+				<li>
+					<div class="button"><div class="buttonContent"><button type="button" class="close">取消</button></div></div>
+				</li>
+			</ul>
+		</div>
+	</form>
+</div>
